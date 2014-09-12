@@ -1,13 +1,9 @@
+var map = {};
+var map_markers = [];
+
 function initialize() {
-  var map = createMap();
+  map = createMap();
   addNLMarker(map);
-
-  var selected_countries = ['IN', 'ES', 'FR'];
-
-  selected_countries.map(function(country_code) {
-    marker = createMarker(country_code);
-    marker.setMap(map);
-  });
 }
 
 function createMap() {
@@ -47,10 +43,39 @@ function loadScript() {
   document.body.appendChild(script);
 }
 
+function countryCount(country_objects) {
+  console.log(country_objects);
+  var country_codes = _.keys(country_objects).map(function(key) { return country_objects[key]["country_code"]; });
+  var counts = {};
+
+  for(var i = 0; i< country_codes.length; i++) {
+      var num = country_codes[i];
+      counts[num] = counts[num] ? counts[num]+1 : 1;
+  }
+  return counts;
+}
+
+function remove_markers() {
+  // TODO: this isn't the correct way to delete markers, fix it.
+  map_markers.forEach(function(marker) {
+    marker.setMap(null);
+  });
+  map_markers = [];
+}
+
 var countriesRef = new Firebase('https://popping-inferno-944.firebaseio.com/livecountries');
 
 countriesRef.on('value', function (snapshot) {
-  console.log(snapshot.val());
+  remove_markers();
+  var country_count = countryCount(snapshot.val());
+  console.log(country_count);
+  var selected_countries = _.keys(country_count);
+
+  selected_countries.map(function(country_code) {
+    marker = createMarker(country_code);
+    marker.setMap(map);
+    map_markers.push(marker);
+  });
 }, function (errorObject) {
   console.log('The read failed: ' + errorObject.code);
 });
