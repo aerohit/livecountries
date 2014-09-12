@@ -14,21 +14,28 @@
 
     <script type="text/javascript">
       function initialize() {
+        var map = createMap();
+        addNLMarker(map);
+      }
+
+      function createMap() {
         var mapOptions = {
-          center: { lat: 52.132633, lng: 5.291266},
-          zoom: 4
+          // centered on NL.
+          center: { lat: 52.132633, lng: 5.291266 },
+          zoom: 3
         };
 
-        var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+        return new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+      }
 
-        var marker = new google.maps.Marker(
+      function addNLMarker(map) {
+        new google.maps.Marker(
           {
             position: map.getCenter(),
             map: map,
             title: 'Click to zoom'
           }
         );
-
       }
 
       function loadScript() {
