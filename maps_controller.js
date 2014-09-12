@@ -3,7 +3,7 @@ var map_markers = [];
 
 function initialize() {
   map = createMap();
-  addNLMarker(map);
+  //addNLMarker(map);
 }
 
 function createMap() {
