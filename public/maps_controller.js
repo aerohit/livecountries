@@ -19,10 +19,11 @@ function createMap() {
   return new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 }
 
-function createMarker(country_code) {
+function createMarker(country_code, user_count) {
   var coords = countryCodes[country_code];
   return new google.maps.Marker({
     position: { lat: coords[0], lng: coords[1] },
+    icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=' + user_count.toString() + '|FF0000|000000',
     title: coords[2]
   });
 }
@@ -79,7 +80,7 @@ function populateMarkers(data) {
   var selected_countries = _.keys(country_count);
 
   selected_countries.map(function(country_code) {
-    var marker = createMarker(country_code);
+    var marker = createMarker(country_code, country_count[country_code]);
     marker.setMap(map);
     mapMarkers.push(marker);
   });
