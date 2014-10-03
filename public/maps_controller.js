@@ -1,9 +1,10 @@
-var map = {};
-var map_markers = [];
+var map = undefined;
+var mapMarkers = [];
+var mySocket = undefined;
 
 function initialize() {
   map = createMap();
-  //addNLMarker(map);
+  hookBaseConnectionHandler();
 }
 
 function createMap() {
@@ -26,15 +27,6 @@ function createMarker(country_code) {
   });
 }
 
-function addNLMarker(map) {
-  var coords = countryCodes['NL'];
-  new google.maps.Marker({
-    position: { lat: coords[0], lng: coords[1] },
-    map: map,
-    title: 'Click to zoom'
-  });
-}
-
 function loadScript() {
   var script  = document.createElement('script');
   script.type = 'text/javascript';
@@ -43,9 +35,34 @@ function loadScript() {
   document.body.appendChild(script);
 }
 
+function removeMarkers() {
+  // TODO: this isn't the correct way to delete markers, fix it.
+  mapMarkers.forEach(function(marker) {
+    marker.setMap(null);
+  });
+  mapMarkers = [];
+}
+
+
+function hookBaseConnectionHandler() {
+  mySocket = new HookBase("ws:0.0.0.0:8125");
+
+  mySocket.onOpen(function() {
+    mySocket.getAll(function(data) {
+      populateMarkers(data);
+    });
+  });
+
+  mySocket.onDataChange(function(data) {
+    populateMarkers(data);
+  });
+}
+
 function countryCount(country_objects) {
-  console.log(country_objects);
-  var country_codes = _.keys(country_objects).map(function(key) { return country_objects[key]["country_code"]; });
+  var country_codes = _.values(country_objects).filter(function(key) {
+    // TODO: fix this.
+    return key != "dataChanged" && key != "respondingAll";
+  });
   var counts = {};
 
   for(var i = 0; i< country_codes.length; i++) {
@@ -55,27 +72,14 @@ function countryCount(country_objects) {
   return counts;
 }
 
-function remove_markers() {
-  // TODO: this isn't the correct way to delete markers, fix it.
-  map_markers.forEach(function(marker) {
-    marker.setMap(null);
-  });
-  map_markers = [];
-}
-
-var countriesRef = new Firebase('https://popping-inferno-944.firebaseio.com/livecountries');
-
-countriesRef.on('value', function (snapshot) {
-  remove_markers();
-  var country_count = countryCount(snapshot.val());
-  console.log(country_count);
+function populateMarkers(data) {
+  removeMarkers();
+  var country_count = countryCount(data);
   var selected_countries = _.keys(country_count);
 
   selected_countries.map(function(country_code) {
-    marker = createMarker(country_code);
+    var marker = createMarker(country_code);
     marker.setMap(map);
-    map_markers.push(marker);
+    mapMarkers.push(marker);
   });
-}, function (errorObject) {
-  console.log('The read failed: ' + errorObject.code);
-});
+}
