@@ -45,7 +45,8 @@ function removeMarkers() {
 
 
 function hookBaseConnectionHandler() {
-  mySocket = new HookBase("ws:0.0.0.0:8125");
+  //mySocket = new HookBase("ws:0.0.0.0:8125");
+  mySocket = new HookBase("ws:95.85.61.4:8125");
 
   mySocket.onOpen(function() {
     mySocket.getAll(function(data) {
